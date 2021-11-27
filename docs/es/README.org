@@ -1,0 +1,18 @@
+#+TITLE: RandomCameraReview
+
+* Overview
+[['./project_definition.md']]
+* Arquitectura
+En ambos desarrolle con la clean architecture, por que?, es simple de escalar para apis. Ademas todas se haran bajo el standar REST
+** Node con Express
+Use Express por que es sencillo definir Middlewares, pero tranquilamente usted puede hacer el cambio a Fastity.
+** Plan de Pruebas
+- Registrar usuario, crear reviews, y que alguien pueda acceder y leerlo
+EndToEnd testing
+** Go con Ging
+Use Go con Ging, para practicar la programacion concurrente. Ging por que no tiene ningun tipo de arquitectura implantada,
+** PostgreSQL x2
+- Escalamiento horizontal
+- Una para escritura y lectura, la otra solo para lectura
+Use PostgreSQL, Por que?, necesitaba entablar relaciones y manejar untipo de dato array para adjuntar las urls de la fotos.
+Podria usarse MongoDB usando referencias,

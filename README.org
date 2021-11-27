@@ -1,0 +1,9 @@
+#+TITLE: RandomReviewCamera
+
+
+* Overview
+* Architecture
+** PostgreSQL to Aurora RDS in AWS
+I use PostgreSQL, why? i need simple relations for scaling simple in a u
+** Node
+** Go
