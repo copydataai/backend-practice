@@ -1,0 +1,37 @@
+{
+  "name": "ec2-gets",
+  "version": "1.0.0",
+  "description": "Manage requests",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "dev": "ENV=development nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/copydataai/backend-practice/node/ec2"
+  },
+  "keywords": [
+    "express",
+    "node",
+    "knex",
+    "pg",
+    "jest"
+  ],
+  "author": "copydataai@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "knex": "^0.95.15",
+    "pg": "^8.7.1"
+  },
+  "devDependencies": {
+    "@hapi/boom": "^9.1.4",
+    "cors": "^2.8.5",
+    "jest": "^27.4.2",
+    "nodemon": "^2.0.15",
+    "supertest": "^6.1.6"
+  }
+}
