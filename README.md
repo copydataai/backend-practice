@@ -2,15 +2,15 @@
 
 ### version Spanish
 
-- [Spanish ]('/docs/es/README.md')
+- [Spanish ](./docs/es/README.md)
 
 ## Overview
 
-[definition of the project and customer requirements]('/docs/en/definitionProject.md')
+[definition of the project and customer requirements](./docs/en/definitionProject.md)
 
 ## Architecture
 
-![Architecture based to AWS](/docs/Backend-practice.png)
+![Architecture based to AWS](./docs/Backend-practice.png)
 
 ### PostgreSQL x2
 
