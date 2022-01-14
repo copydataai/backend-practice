@@ -1,0 +1,9 @@
+ENV=staging
+PORT=8080
+HOST=localhost
+DB_HOST=pg_main
+DB_PORT=5432
+DB_USER=user_read
+DB_PASSWORD=user_read
+DB_DB=reviews-camera
+DB_DIALECT=pg

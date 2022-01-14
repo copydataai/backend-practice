@@ -1,0 +1,5 @@
+PGUSER=user_write
+PGPASSWORD=user_write
+PGHOST=pg_main
+PGPORT=5432
+PGDATBASE=reviews-camera
