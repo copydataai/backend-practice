@@ -2,7 +2,7 @@
 
 ## Overview
 
-[Definicion del proyecto y requerimientos del cliente](/project_definition.md)
+[Definicion del proyecto y requerimientos del cliente](./project_definition.md)
 
 ### Alcance(Scope)
 

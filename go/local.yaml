@@ -1,0 +1,72 @@
+version: "3.3"
+services:
+  load_balancer:
+    build:
+      dockerfile: ./compose/local/nginx/Dockerfile
+      context: .
+    env_file:
+      - ./.envs/.nginx
+    ports:
+      - "127.0.0.1:80:80"
+  ec2-gets:
+    build:
+      context: ./ec2
+      dockerfile: ../compose/local/ec2/Dockerfile
+    env_file:
+      - ./.envs/.ec2
+    ports:
+      - 3000:8080
+  create-lambda:
+    build:
+      context: ./create
+      dockerfile: ../compose/local/create/Dockerfile
+    env_file:
+      - ./.envs/.create
+    ports:
+      - 3001:8080
+  auth-lambda:
+    build:
+      context: ./auth
+      dockerfile: ../compose/local/auth/Dockerfile
+    env_file:
+      - ./.envs/.auth
+    ports:
+      - 3002:8080
+  pg_main:
+    build:
+      dockerfile: ./compose/postgres/Write/Dockerfile
+      context: ..
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: reviews-camera
+      PG_REP_USER: replicator
+      PG_REP_PASSWORD: 123456
+    volumes:
+      - ./compose/postgres/Write/pg_hba_example.conf:/etc/postgresql/pg_ident.conf
+      - ./compose/postgres/Write/postgresql_example.conf:/etc/postgresql/postgresql.conf
+    ports:
+      - 5436:5432
+    networks:
+      default:
+        aliases:
+          - pg_cluster
+  # pg_replica:
+  #   build:
+  #     dockerfile: ./compose/postgres/Read/Dockerfile
+  #     context: ..
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: admin
+  #     POSTGRES_PASSWORD: example
+  #     POSTGRES_DB: reviews-camera
+  #     PG_REP_USER: rep
+  #     PG_REP_PASSWORD: 123456
+  #     PG_MASTER_HOST: pg_main
+  #   ports:
+  #     - 5432:5432
+  #   networks:
+  #     default:
+  #       aliases:
+  #         - pg_cluster

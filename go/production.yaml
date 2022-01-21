@@ -1,0 +1,29 @@
+version: "3.3"
+services:
+  loadB:
+    build:
+      dockerfile: ./compose/production/nginx/Dockerfile
+      context: .
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+  ec2:
+    build:
+      context: .
+      dockerfile: ./compose/production/ec2/Dockerfile
+    depends_on:
+      - postgresRead
+  lambda:
+    build:
+      context: .
+      dockerfile: ./compose/production/lambda/Dockerfile
+    depends_on:
+      - postgresWrite
+  postgresRead:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Read/Dockerfile
+  postgresWrite:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Write/Dockerfile

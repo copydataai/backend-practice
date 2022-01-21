@@ -1,0 +1,5 @@
+root = true
+
+[*.go]
+indent_guides = 2
+indent = space
