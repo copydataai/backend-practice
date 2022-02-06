@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  createReviewFunction:
+    Type: AWS::SERVERLESS::Function
+    Properties:
+      CodeUri: "review/"
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Events:
+        CatchAll:
+          Type: "Api"
+          Properties:
+            Path: "/reviews"
+            Method: "post"
+    Metadata:
+      DockerTag: go1.x-v1
+      DockerContext: ./review
+      Dockerfile: Dockerfile
+  createProductFunction:
+    Type: AWS::SERVERLESS::Function
+    Properties:
+      CodeUri: "product/"
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Events:
+        CatchAll:
+          Type: "Api"
+          Properties:
+            Path: "/products"
+            Method: "post"
+    Metadata:
+      DockerTag: go1.x-v1
+      DockerContext: ./review
+      Dockerfile: Dockerfile
+  createProductTypeFunction:
+    Type: AWS::SERVERLESS::Function
+    Properties:
+      CodeUri: "product-type/"
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Events:
+        CatchAll:
+          Type: "Api"
+          Properties:
+            Path: "/types"
+            Method: "post"
+    Metadata:
+      DockerTag: go1.x-v1
+      DockerContext: ./review
+      Dockerfile: Dockerfile
