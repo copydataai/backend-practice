@@ -33,8 +33,16 @@ func InitRouter(deps Dependencies) (router *mux.Router) {
 
 	// Version 1 API management
 
+	// Reviews
 	router.HandleFunc("/reviews", ListReviewsHandler(deps)).Methods("GET") //.Headers(versionHeader, v1)
+	router.HandleFunc("/reviews/{id}", GetReviewHandler(deps)).Methods("GET")
+
+	//Products
 	router.HandleFunc("/products", ListProductsHandler(deps)).Methods("GET")
+	router.HandleFunc("/products/{id}", GetProductHandler(deps)).Methods("GET")
+
+	// ProductTypes
 	router.HandleFunc("/types", ListProductTypeHandler(deps)).Methods("GET")
+	router.HandleFunc("/types/{id}", GetProductTypeHandler(deps)).Methods("GET")
 	return
 }

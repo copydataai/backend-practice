@@ -1,12 +1,12 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/copydataai/backend-practice/go/ec2/libs"
 	"github.com/copydataai/backend-practice/go/ec2/services"
 	_ "github.com/lib/pq"
-	"log"
-	"net/http"
-	//"net/http"
 )
 
 func main() {
