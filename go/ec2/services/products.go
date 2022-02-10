@@ -1,8 +1,6 @@
 package services
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -11,22 +9,13 @@ import (
 
 func ListProductsHandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		products, err := deps.Posts.ListProducts()
+		products, count, err := deps.Posts.ListProducts()
 		if err != nil {
-			log.Fatal("error fetching data")
-			w.WriteHeader(http.StatusInternalServerError)
+			ErrBadFetch.Send(w)
 			return
-		}
 
-		respBytes, err := json.Marshal(products)
-		if err != nil {
-			log.Fatal(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
 		}
-
-		w.Header().Add("Content-Type", "application/json")
-		w.Write(respBytes)
+		Success(products, http.StatusOK, count).Send(w)
 	})
 }
 
@@ -37,23 +26,14 @@ func GetProductHandler(deps Dependencies) http.HandlerFunc{
 		idString := vars["id"]
 		idInt, err := strconv.Atoi(idString)
 		if err != nil {
-			log.Fatal("error bad request {id} = int")
-			w.WriteHeader(http.StatusBadRequest)
-		}
-		product, err := deps.Posts.GetProductById(int64(idInt))
-		if err != nil {
-			log.Fatal("error fetching data")
-			w.WriteHeader(http.StatusInternalServerError)
+			ErrBadRequest.Send(w)
 			return
 		}
-		respBytes, err := json.Marshal(product)
+		product, count, err := deps.Posts.GetProductById(int64(idInt))
 		if err != nil {
-			log.Fatal(err)
-			w.WriteHeader(http.StatusInternalServerError)
+			ErrBadFetch.Send(w)
 			return
 		}
-
-		w.Header().Add("Content-Type", "application/json")
-		w.Write(respBytes)
+		Success(product, http.StatusOK, count).Send(w)
 	})
 }

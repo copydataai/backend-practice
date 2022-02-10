@@ -1,8 +1,6 @@
 package services
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -10,23 +8,13 @@ import (
 )
 
 func ListReviewsHandler(deps Dependencies) http.HandlerFunc {
-	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		reviews, err := deps.Posts.ListReviews()
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reviews, count, err := deps.Posts.ListReviews()
 		if err != nil {
-			log.Fatal("error fetching data")
-			rw.WriteHeader(http.StatusInternalServerError)
+			ErrBadFetch.Send(w)
 			return
 		}
-
-		respBytes, err := json.Marshal(reviews)
-		if err != nil {
-			log.Fatal(err)
-			rw.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		rw.Header().Add("Content-Type", "application/json")
-		rw.Write(respBytes)
+		Success(reviews, http.StatusOK, count).Send(w)
 	})
 }
 
@@ -36,23 +24,14 @@ func GetReviewHandler(deps Dependencies) http.HandlerFunc{
 		idString := vars["id"]
 		idInt, err := strconv.Atoi(idString)
 		if err != nil {
-			log.Fatal("error bad request {id} = int")
-			w.WriteHeader(http.StatusBadRequest)
-		}
-		review, err := deps.Posts.GetReviewById(int64(idInt))
-		if err != nil {
-			log.Fatal("error fetching data")
-			w.WriteHeader(http.StatusInternalServerError)
+			ErrBadRequest.Send(w)
 			return
 		}
-		respBytes, err := json.Marshal(review)
+		review, count, err := deps.Posts.GetReviewById(int64(idInt))
 		if err != nil {
-			log.Fatal(err)
-			w.WriteHeader(http.StatusInternalServerError)
+			ErrBadFetch.Send(w)
 			return
 		}
-
-		w.Header().Add("Content-Type", "application/json")
-		w.Write(respBytes)
+		Success(review, http.StatusOK, count).Send(w)
 	})
 }

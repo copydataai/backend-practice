@@ -24,27 +24,31 @@ type Users struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
-func (this pg) ListReviews() (reviews []Reviews, err error) {
-	rows, err := this.db.Query("SELECT * FROM reviews;")
+func (this pg) ListReviews() (reviews []Reviews, count int, err error) {
+	rows, err := this.db.Query("SELECT * FROM reviews LIMIT 5;")
 	if err != nil {
-		return reviews, err
+		return reviews, -1, err
 	}
 
 	for rows.Next() {
+		count++
 		var review Reviews
 		rows.Scan(&review.ID, &review.Title, &review.Content, &review.User, &review.Product, &review.CreatedAt)
 		reviews = append(reviews, review)
 	}
 
-	return reviews, nil
+	return reviews, count, nil
 }
 
-func (this pg) GetReviewById(id int64) (Reviews, error) {
+func (this pg) GetReviewById(id int64) (Reviews, int, error) {
 	var review Reviews
 	row := this.db.QueryRow("SELECT * FROM reviews WHERE id = $1 LIMIT 1;", id)
-	if row.Err() == nil {
-		return review, row.Err()
+	if row.Err() != nil {
+		return review, -1, row.Err()
 	}
-	row.Scan(&review.ID, &review.Title, &review.Content, &review.User, &review.Product, &review.Product, &review.CreatedAt)
-	return review, nil
+	err := row.Scan(&review.ID, &review.Title, &review.Content, &review.User, &review.Product, &review.Product, &review.CreatedAt)
+	if err != nil {
+		return Reviews{}, -1, err
+	}
+	return review, 1, nil
 }

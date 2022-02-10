@@ -2,14 +2,14 @@ package libs
 
 type Posts interface {
 	// Reviews
-	ListReviews() ([]Reviews, error)
-	GetReviewById(int64) (Reviews, error)
+	ListReviews() ([]Reviews, int, error)
+	GetReviewById(int64) (Reviews, int, error)
 
 	// Products
-	ListProducts() ([]Products, error)
-	GetProductById(int64) (Products, error)
+	ListProducts() ([]Products, int, error)
+	GetProductById(int64) (Products, int, error)
 
 	// ProductTypes
-	ListProductTypes() ([]ProductType, error)
-	GetProductTypeById(int64) (ProductType, error)
+	ListProductTypes() ([]ProductType, int, error)
+	GetProductTypeById(int64) (ProductType, int, error)
 }
