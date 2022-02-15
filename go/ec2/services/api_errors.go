@@ -7,7 +7,7 @@ import (
 var (
 	ErrBadRequest   = ErrorResponse{StatusCode: http.StatusBadRequest, Type: "api_error", Message: "Cannot process current request"}
 	ErrBadFetch     = ErrorResponse{StatusCode: http.StatusInternalServerError, Type: "Error to fetch data", Message: "Error to send query to DB"}
-	Err             = ErrorResponse{StatusCode: 2, Type: "", Message: ""}
+	ErrNotFound             = ErrorResponse{StatusCode: http.StatusNotFound, Type: "not found in DB", Message: "This data not exists"}
 	ErrInvalidJSON  = ErrorResponse{StatusCode: http.StatusBadRequest, Type: "invalid_json", Message: "Invalid or malformed JSON"}
 	// decide between conflict and bad request
 	ErrAlreadyExists = ErrorResponse{StatusCode: http.StatusConflict, Type: "duplicate_entry", Message: "Another entity has the same value as this field"}

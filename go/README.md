@@ -2,13 +2,13 @@
 
 
 ## Local
-*Find how test lambda without sam*
+**Find how test lambda without sam**
 ``` sh
 make build-local-docker
 ```
 
 ## Production 
-*In Development*
+**In Development**
 
 ``` sh
 make build-production-docker

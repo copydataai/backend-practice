@@ -2,7 +2,6 @@ package libs
 
 import (
 	"time"
-	"fmt"
 )
 
 type Products struct {
@@ -15,7 +14,7 @@ type Products struct {
 }
 
 func (this pg) ListProducts() (products []Products, count int, err error) {
-	rows, err := this.db.Query("SELECT * FROM products;")
+	rows, err := this.db.Query(`SELECT p.id, pt.id, pt.name, pt.detail, p.trademark, p.manufacturing, p."SKU", p.created_at FROM products as p JOIN product_type as pt on p.detail = pt.id;`)
 	defer rows.Close()
 	if err != nil {
 		return products, -1, err
@@ -24,8 +23,7 @@ func (this pg) ListProducts() (products []Products, count int, err error) {
 	for rows.Next() {
 		count ++
 		var product Products
-		err := rows.Scan(&product.ID, &product.Detail, &product.Trademark, &product.Manufacturing, &product.SKU, &product.CreatedAt)
-		fmt.Println(err)
+		rows.Scan(&product.ID, &product.Detail.ID, &product.Detail.Name, &product.Detail.Detail, &product.Trademark, &product.Manufacturing, &product.SKU, &product.CreatedAt)
 		products = append(products, product)
 	}
 
@@ -34,13 +32,13 @@ func (this pg) ListProducts() (products []Products, count int, err error) {
 
 func (this pg) GetProductById(id int64) (Products, int, error){
 	var product Products
-	row := this.db.QueryRow("SELECT * FROM products WHERE id = $1 LIMIT 1;", id)
+	row := this.db.QueryRow(`SELECT p.id, pt.id, pt.name, pt.detail, p.trademark, p.manufacturing, p."SKU", p.created_at FROM products as p JOIN product_type as pt on p.detail = pt.id WHERE p.id = $1 LIMIT 1;`, id)
 	if row.Err() != nil{
 		return product, -1, row.Err()
 	}
-	err := row.Scan(&product.ID, &product.Detail, &product.Trademark, &product.Manufacturing, &product.SKU, &product.CreatedAt)
+	err := row.Scan(&product.ID, &product.Detail.ID, &product.Detail.Name, &product.Detail.Detail, &product.Trademark, &product.Manufacturing, &product.SKU, &product.CreatedAt)
 	if err != nil {
-		return Products{}, -1, err
+		return Products{}, 0, err
 	}
 	return product, 1, nil
 }

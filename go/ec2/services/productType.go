@@ -11,6 +11,10 @@ func ListProductTypeHandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		productTypes, count, err := deps.Posts.ListProductTypes()
 		if err != nil {
+			if count == 0{
+				ErrNotFound.Send(w)
+				return
+			}
 			ErrBadFetch.Send(w)
 			return
 		}
@@ -29,6 +33,10 @@ func GetProductTypeHandler(deps Dependencies) http.HandlerFunc{
 		}
 		productType, count, err := deps.Posts.GetProductTypeById(int64(idInt))
 		if err != nil {
+			if count == 0{
+				ErrNotFound.Send(w)
+				return
+			}
 			ErrBadFetch.Send(w)
 			return
 		}

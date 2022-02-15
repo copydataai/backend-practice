@@ -11,6 +11,10 @@ func ListReviewsHandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reviews, count, err := deps.Posts.ListReviews()
 		if err != nil {
+			if count == 0{
+				ErrNotFound.Send(w)
+				return
+			}
 			ErrBadFetch.Send(w)
 			return
 		}
@@ -29,6 +33,10 @@ func GetReviewHandler(deps Dependencies) http.HandlerFunc{
 		}
 		review, count, err := deps.Posts.GetReviewById(int64(idInt))
 		if err != nil {
+			if count == 0{
+				ErrNotFound.Send(w)
+				return
+			}
 			ErrBadFetch.Send(w)
 			return
 		}

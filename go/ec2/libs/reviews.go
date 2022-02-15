@@ -16,16 +16,11 @@ type Reviews struct {
 type Users struct {
 	ID         uint      `json:"id"`
 	Name       string    `json:"name"`
-	Email      *string   `json:"email"`
-	Password   string    `json:"password"`
-	Country    string    `json:"country"`
 	Speciality string    `json:"speciality"`
-	Role       string    `json:"role"`
-	CreatedAt  time.Time `json:"created_at"`
 }
 
 func (this pg) ListReviews() (reviews []Reviews, count int, err error) {
-	rows, err := this.db.Query("SELECT * FROM reviews LIMIT 5;")
+	rows, err := this.db.Query(`SELECT rev.id, rev.title, rev.content, users.id, users.name, users.speciality, prod.id, type.id, type.name, type.detail, prod.trademark, prod.manufacturing, prod."SKU", prod.created_at, rev.created_at FROM reviews as rev JOIN users on rev.user = users.id JOIN products as prod on rev.product = prod.id JOIN product_type as type on prod.id = type.id;`)
 	if err != nil {
 		return reviews, -1, err
 	}
@@ -33,7 +28,7 @@ func (this pg) ListReviews() (reviews []Reviews, count int, err error) {
 	for rows.Next() {
 		count++
 		var review Reviews
-		rows.Scan(&review.ID, &review.Title, &review.Content, &review.User, &review.Product, &review.CreatedAt)
+		rows.Scan(&review.ID, &review.Title, &review.Content, &review.User.ID, &review.User.Name, &review.User.Speciality, &review.Product.ID, &review.Product.Detail.ID, &review.Product.Detail.Name, &review.Product.Detail.Detail, &review.Product.Trademark, &review.Product.Manufacturing, &review.Product.SKU, &review.Product.CreatedAt, &review.CreatedAt)
 		reviews = append(reviews, review)
 	}
 
@@ -42,13 +37,13 @@ func (this pg) ListReviews() (reviews []Reviews, count int, err error) {
 
 func (this pg) GetReviewById(id int64) (Reviews, int, error) {
 	var review Reviews
-	row := this.db.QueryRow("SELECT * FROM reviews WHERE id = $1 LIMIT 1;", id)
+	row := this.db.QueryRow(`SELECT rev.id, rev.title, rev.content, users.id, users.name, users.speciality, prod.id, type.id, type.name, type.detail, prod.trademark, prod.manufacturing, prod."SKU", prod.created_at, rev.created_at FROM reviews as rev JOIN users on rev.user = users.id JOIN products as prod on rev.product = prod.id JOIN product_type as type on prod.id = type.id WHERE rev.id = $1 LIMIT 1;`, id)
 	if row.Err() != nil {
 		return review, -1, row.Err()
 	}
-	err := row.Scan(&review.ID, &review.Title, &review.Content, &review.User, &review.Product, &review.Product, &review.CreatedAt)
+	err := row.Scan(&review.ID, &review.Title, &review.Content, &review.User.ID, &review.User.Name, &review.User.Speciality, &review.Product.ID, &review.Product.Detail.ID, &review.Product.Detail.Name, &review.Product.Detail.Detail, &review.Product.Trademark, &review.Product.Manufacturing, &review.Product.SKU, &review.Product.CreatedAt, &review.CreatedAt)
 	if err != nil {
-		return Reviews{}, -1, err
+		return Reviews{}, 0, err
 	}
 	return review, 1, nil
 }

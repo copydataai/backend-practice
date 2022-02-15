@@ -11,6 +11,10 @@ func ListProductsHandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		products, count, err := deps.Posts.ListProducts()
 		if err != nil {
+			if count == 0{
+				ErrNotFound.Send(w)
+				return
+			}
 			ErrBadFetch.Send(w)
 			return
 
@@ -31,6 +35,10 @@ func GetProductHandler(deps Dependencies) http.HandlerFunc{
 		}
 		product, count, err := deps.Posts.GetProductById(int64(idInt))
 		if err != nil {
+			if count == 0{
+				ErrNotFound.Send(w)
+				return
+			}
 			ErrBadFetch.Send(w)
 			return
 		}

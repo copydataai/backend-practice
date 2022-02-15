@@ -32,7 +32,7 @@ func (this pg) GetProductTypeById(id int64) (ProductType, int, error){
 	}
 	err := row.Scan(&productType.ID, &productType.Name, &productType.Detail)
 	if err != nil {
-		return ProductType{}, -1, err
+		return ProductType{}, 0, err
 	}
 	return productType, 1, nil
 }
