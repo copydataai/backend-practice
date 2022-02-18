@@ -4,12 +4,16 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
-	_ "github.com/lib/pq"
-	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/golang-jwt/jwt"
+	_ "github.com/lib/pq"
 )
 
 type UserLogin struct {
@@ -17,19 +21,48 @@ type UserLogin struct {
 	Password string `json:"password"`
 }
 
-func (user UserLogin) verifyUser(db *sql.DB) string {
-	var userVerify UserLogin
-	userQuery := db.QueryRow("SELECT password from users WHERE email = $1", user.Email)
-	userQuery.Scan(&userVerify.Email, &userVerify.Password)
-	db.Close()
-	return "is user"
+type UserQuery struct {
+	Id       int    `json:"id"`
+	Password string `json:"password"`
+}
+
+type ResponseClaim struct {
+	Exp  int64 `json:"exp"`
+	User int   `json:"user"`
+	jwt.StandardClaims
+}
+
+func (user UserLogin) verifyUser(db *sql.DB) (string, error) {
+	var userVerify UserQuery
+	var SecretKey = os.Getenv("SECRET_KEY")
+	defer db.Close()
+	userQuery := db.QueryRow("SELECT id, password from users WHERE email = $1;", user.Email)
+	if userQuery.Err() != nil {
+		return "", userQuery.Err()
+	}
+	if err := userQuery.Scan(&userVerify.Id, &userVerify.Password); err != nil {
+		return "", err
+	}
+	fmt.Println(userVerify)
+	fmt.Println(user)
+	if err := bcrypt.CompareHashAndPassword([]byte(userVerify.Password), []byte(user.Password)); err != nil {
+		return "", err
+	}
+	responseClaim := ResponseClaim{Exp: time.Now().Add(time.Hour * 72).Unix(), User: userVerify.Id}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, responseClaim)
+	ss, err := token.SignedString([]byte(SecretKey))
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("Error to SignedString")
+	return ss, nil
 }
 
 type pg struct {
 	pg *sql.DB
 }
 
-func initPg() *pg {
+func initPg() (*pg, error) {
 	var (
 		user     = os.Getenv("USER_PG")
 		password = os.Getenv("PASSWORD_PG")
@@ -37,29 +70,29 @@ func initPg() *pg {
 		host     = os.Getenv("HOST_PG")
 		port     = os.Getenv("PORT_PG")
 	)
-	configDB := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s", user, password, dbname, host, port)
+	configDB := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", user, password, dbname, host, port)
 	db, err := sql.Open("postgres", configDB)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	if err = db.Ping(); err != nil {
-		panic(err)
-	} else {
-		fmt.Println("DB Connected...")
-	}
-	return &pg{db}
+	return &pg{db}, nil
 }
 func login(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	db := initPg()
-	var user UserLogin
-	err := json.Unmarshal([]byte(request.Body), &user)
+	db, err := initPg()
 	if err != nil {
-		log.Fatal(err)
+		return events.APIGatewayProxyResponse{}, err
 	}
-	body := user.verifyUser(db.pg)
+	var user UserLogin
+	if err := json.Unmarshal([]byte(request.Body), &user); err != nil {
+		return events.APIGatewayProxyResponse{}, err
+	}
+	verify, errorr := user.verifyUser(db.pg)
+	if errorr != nil {
+		return events.APIGatewayProxyResponse{}, err
+	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       body,
+		Body:       verify,
 	}, nil
 }
 

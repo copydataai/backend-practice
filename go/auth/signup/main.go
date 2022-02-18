@@ -3,15 +3,15 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
-	_ "github.com/lib/pq"
-	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserCreate struct {
@@ -23,16 +23,27 @@ type UserCreate struct {
 	Password   string `json:"password"`
 }
 
-func (user UserCreate) insertUser(db *sql.DB) string {
-	db.QueryRow("INSERT INTO users(name, country, speciality, role, created_at, email, password) VALUES($1, $2, $3, $4, $5, $6)", user.Name, user.Country, user.Speciality, user.Role, time.Now().String(), user.Email, user.Password)
-	return "User Created"
+type verifyUser struct{
+	Email string `json:"email"`
+}
+
+func (user UserCreate) insertUser(db *sql.DB) (bool, error) {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return false, err
+	}
+	insert := db.QueryRow("INSERT INTO users(name, country, speciality, role, created_at, email, password) VALUES($1, $2, $3, $4, $5, $6, $7)", user.Name, user.Country, user.Speciality, user.Role, time.Now().Format(time.RFC3339), user.Email, string(passwordHash))
+	if insert.Err() != nil {
+		return false, insert.Err()
+	}
+	return true, nil
 }
 
 type pg struct {
 	pg *sql.DB
 }
 
-func initPg() *pg {
+func initPg() (*pg, error) {
 	var (
 		user     = os.Getenv("USER_PG")
 		password = os.Getenv("PASSWORD_PG")
@@ -40,39 +51,29 @@ func initPg() *pg {
 		host     = os.Getenv("HOST_PG")
 		port     = os.Getenv("PORT_PG")
 	)
-	configDB := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s", user, password, dbname, host, port)
+	configDB := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", user, password, dbname, host, port)
 	db, err := sql.Open("postgres", configDB)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	if err = db.Ping(); err != nil {
-		panic(err)
-	} else {
-		fmt.Println("DB Connected...")
-	}
-	return &pg{db}
+	return &pg{db}, nil
 }
 
-var (
-	// ErrNon200Response non 200 status code in response
-	ErrNon200Response = errors.New("Non 200 Response found")
-)
-
 func signup(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	//db := initPg()
-	var user UserCreate
-	err := json.Unmarshal([]byte(request.Body), &user)
+	db, err := initPg()
 	if err != nil {
-		log.Fatal(err)
+		return events.APIGatewayProxyResponse{}, err
 	}
-	newUser, _ := json.Marshal(user)
-	if string(newUser) == request.Body {
-		fmt.Println("This is Equal")
+	defer db.pg.Close()
+	var user UserCreate
+	if err := json.Unmarshal([]byte(request.Body), &user); err != nil {
+		return events.APIGatewayProxyResponse{}, err
 	}
-	//body := user.insertUser(db.pg, request.Body)
+	if created, err := user.insertUser(db.pg) ; !created && err != nil {
+		return events.APIGatewayProxyResponse{}, err
+	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
-		Body:       string(newUser),
 	}, nil
 }
 
