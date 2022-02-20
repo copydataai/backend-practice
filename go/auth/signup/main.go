@@ -59,20 +59,23 @@ func initPg() (*pg, error) {
 	return &pg{db}, nil
 }
 
-func signup(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func signup(request *events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	db, err := initPg()
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return &events.APIGatewayProxyResponse{}, err
 	}
 	defer db.pg.Close()
 	var user UserCreate
 	if err := json.Unmarshal([]byte(request.Body), &user); err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body: err.Error(),
+		}, nil
 	}
 	if created, err := user.insertUser(db.pg) ; !created && err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return &events.APIGatewayProxyResponse{}, err
 	}
-	return events.APIGatewayProxyResponse{
+	return &events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
 	}, nil
 }

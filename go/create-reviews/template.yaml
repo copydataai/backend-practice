@@ -7,53 +7,83 @@ Globals:
 
 Resources:
   createReviewFunction:
-    Type: AWS::SERVERLESS::Function
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: "review/"
+      CodeUri: review/
       PackageType: Image
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          SECRET_KEY: "ihaveasecret"
+          PORT_PG: 5432
+          DB_PG: "fheicxgc"
+          HOST_PG: "salt.db.elephantsql.com"
+          USER_PG: "fheicxgc"
+          PASSWORD_PG: "SK5m_1h39TeSwei_AE14Ra3ChpsdG_aT"
       Events:
-        CatchAll:
-          Type: "Api"
+        ApiEvent:
+          Type: HttpApi
+        Api:
+          Type: Api
           Properties:
-            Path: "/reviews"
-            Method: "post"
+            Path: /reviews
+            Method: post
     Metadata:
       DockerTag: go1.x-v1
       DockerContext: ./review
       Dockerfile: Dockerfile
   createProductFunction:
-    Type: AWS::SERVERLESS::Function
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: "product/"
+      CodeUri: product/
       PackageType: Image
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          SECRET_KEY: "ihaveasecret"
+          PORT_PG: 5432
+          DB_PG: "fheicxgc"
+          HOST_PG: "salt.db.elephantsql.com"
+          USER_PG: "fheicxgc"
+          PASSWORD_PG: "SK5m_1h39TeSwei_AE14Ra3ChpsdG_aT"
       Events:
-        CatchAll:
-          Type: "Api"
+        ApiEvent:
+          Type: HttpApi
+        Api:
+          Type: Api
           Properties:
-            Path: "/products"
-            Method: "post"
+            Path: /products
+            Method: post
     Metadata:
       DockerTag: go1.x-v1
-      DockerContext: ./review
+      DockerContext: ./product
       Dockerfile: Dockerfile
   createProductTypeFunction:
-    Type: AWS::SERVERLESS::Function
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: "product-type/"
+      CodeUri: product-type/
       PackageType: Image
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          SECRET_KEY: "ihaveasecret"
+          PORT_PG: 5432
+          DB_PG: "fheicxgc"
+          HOST_PG: "salt.db.elephantsql.com"
+          USER_PG: "fheicxgc"
+          PASSWORD_PG: "SK5m_1h39TeSwei_AE14Ra3ChpsdG_aT"
       Events:
-        CatchAll:
-          Type: "Api"
+        ApiEvent:
+          Type: HttpApi
+        Api:
+          Type: Api
           Properties:
-            Path: "/types"
-            Method: "post"
+            Path: /types
+            Method: post
     Metadata:
       DockerTag: go1.x-v1
-      DockerContext: ./review
+      DockerContext: ./product-type
       Dockerfile: Dockerfile

@@ -6,37 +6,57 @@ Globals:
     Timeout: 10
 
 Resources:
-  signupFunction:
+  SignupFunc:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: "signup/"
       PackageType: Image
       Architectures:
         - x86_64
+      CodeUri: signup/
+      Environment:
+        Variables:
+          SECRET_KEY: "ihaveasecret"
+          PORT_PG: 5432
+          DB_PG: "fheicxgc"
+          HOST_PG: "salt.db.elephantsql.com"
+          USER_PG: "fheicxgc"
+          PASSWORD_PG: "SK5m_1h39TeSwei_AE14Ra3ChpsdG_aT"
       Events:
-        CatchAll:
-          Type: "Api"
+        ApiEvent:
+          Type: HttpApi
+        Api:
+          Type: Api
           Properties:
-            Path: "/signup"
-            Method: "post"
+            Path: /signup
+            Method: post
     Metadata:
       DockerTag: go1.x-v1
       DockerContext: ./signup
       Dockerfile: Dockerfile
-  # loginFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     CodeUri: "authenticate/"
-  #     PackageType: Image
-  #     Architectures:
-  #       - x86_64
-  #     Events:
-  #       CatchAll:
-  #         Type: "Api"
-  #         Properties:
-  #           Path: "/login"
-  #           Method: "post"
-  #   Metadata:
-  #     DockerTag: go1.x-v1
-  #     DockerContext: ./authenticate
-  #     Dockerfile: Dockerfile
+  LoginFunc:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      CodeUri: authenticate/
+      Environment:
+        Variables:
+          SECRET_KEY: "ihaveasecret"
+          PORT_PG: 5432
+          DB_PG: "fheicxgc"
+          HOST_PG: "salt.db.elephantsql.com"
+          USER_PG: "fheicxgc"
+          PASSWORD_PG: "SK5m_1h39TeSwei_AE14Ra3ChpsdG_aT"
+      Events:
+        ApiEvent:
+          Type: HttpApi
+        Api:
+          Type: Api
+          Properties:
+            Path: /login
+            Method: post
+    Metadata:
+      DockerTag: go1.x-v1
+      DockerContext: ./authenticate
+      Dockerfile: Dockerfile
